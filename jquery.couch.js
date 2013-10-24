@@ -677,6 +677,39 @@
         },
 
         /**
+         * Trigger an update handler of a design document
+         * @param {String} ddoc ID of the design doc where the update
+         * handler lives
+         * @param {String} handler The name of the handler to trigger
+         * @param {String} docId Document to update (null for new document)
+         * @param {Object} body Parameters to pass to update handler
+         * @param {ajaxSettings} options <a href="http://api.jquery.com/
+         * jQuery.ajax/#jQuery-ajax-settings">jQuery ajax settings</a>
+         */
+        update: function(ddoc, handler, docId, body, options) {
+          var beforeSend = fullCommit(options);
+          $.extend(options, {successStatus: 201, beforeSend : beforeSend});
+          var method = "POST";
+            var url = (this.uri + "_design/" +
+                       encodeURIComponent(ddoc) +
+                       "/_update/" +
+                       encodeURIComponent(handler));
+          if (docId) {
+              method = "PUT";
+              url = url + '/' + encodeDocId(docId);
+          }
+          ajax({
+              type: method,
+              url: url + encodeOptions(options),
+              contentType: "application/json",
+              data: toJSON(body)
+            },
+            options,
+            "Failed calling update handler"
+          );
+        },
+
+        /**
          * Deletes the specified document from the database. You must supply
          * the current (latest) revision and <code>id</code> of the document
          * to delete eg <code>removeDoc({_id:"mydoc", _rev: "1-2345"})</code>
